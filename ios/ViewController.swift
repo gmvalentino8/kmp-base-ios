@@ -7,14 +7,38 @@
 //
 
 import UIKit
+import common
+import RxSwift
+import RxCocoa
 
 class ViewController: UIViewController {
+    
+    @IBOutlet weak var textLabel: UILabel!
+    
+    private let disposeBag = DisposeBag()
 
+    // TODO: DI
+    private let useCase = TestUseCase(testRepository: TestDataRepository(api: TestApi()))
+    private lazy var viewModel = TestViewModel(usecase: useCase)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
+        viewModel.users
+            .subscribe(onNext: { (response) in
+                switch (response) {
+                case let .success(data):
+                    print("SUCCESS \(data)")
+                case let .error(error):
+                    print("ERROR \(error)")
+                case .loading:
+                    print("LOADING")
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.getUsers()
     }
-
+    
 
 }
-
